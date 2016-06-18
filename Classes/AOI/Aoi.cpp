@@ -18,15 +18,14 @@ void CAoi::Init(int _left, int _top, int _right, int _bottom, int _radius)
 	mRadius = _radius;
 }
 
-std::map<int, int> CAoi::Insert(int _id, int _x, int _y)
+void CAoi::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
 {
-	std::map<int, int> ret;
 	if (mObjVec.find(_id) != mObjVec.end()) //已存在，直接返回
-		return ret;
+		return;
 
 	CQuadTree* tree = mTree->Insert(_id, _x, _y); //返回自己所在的树
 	if (tree == nullptr)
-		return ret;
+		return;
 
 	std::vector<int> result;
 	mTree->Query(_id, _x - mRadius, _y + mRadius, _x + mRadius, _y - mRadius, result);
@@ -37,7 +36,7 @@ std::map<int, int> CAoi::Insert(int _id, int _x, int _y)
 		auto iter = mObjVec.find(id);
 		if (iter != mObjVec.end())
 		{
-			ret.insert(std::make_pair(id, id));
+			_notiList.insert(std::make_pair(id, id)); //返回自己的可视列表，用来刷新别人
 			iter->second->mList.insert(std::make_pair(_id, _id));
 		}
 	}
@@ -46,25 +45,20 @@ std::map<int, int> CAoi::Insert(int _id, int _x, int _y)
 	aoiObj->mId = _id;
 	aoiObj->mX = _x;
 	aoiObj->mY = _y;
-	aoiObj->mTree = tree; //自己所在的树
-	aoiObj->mList = ret; //自己可视的列表
+	aoiObj->mTree = tree; //自己所在的树，为了删除是能更快删除
+	aoiObj->mList = _notiList; //自己可视的列表
 	mObjVec.insert(std::make_pair(_id, aoiObj));
-
-	return ret; //返回自己的可视列表，用来刷新别人
 }
 
-std::map<int, int> CAoi::Remove(int _id)
+void CAoi::Remove(int _id, std::map<int, int>& _notiList)
 {
-	std::map<int, int> ret; 
 	auto iter = mObjVec.find(_id);
 	if (iter == mObjVec.end())
-		return ret;
+		return;
 
 	SAoiObj* aoiObj = iter->second;
 	if (aoiObj->mTree)
 		aoiObj->mTree->Remove(_id);
-	else
-		mTree->Remove(_id);
 
 	//遍历自己可视列表，移除别人可视列表中的自己
 	for (auto iter = aoiObj->mList.begin(); iter != aoiObj->mList.end(); ++iter)
@@ -80,15 +74,14 @@ std::map<int, int> CAoi::Remove(int _id)
 		}
 	}
 
-	ret = aoiObj->mList;
+	_notiList = aoiObj->mList; //返回自己的可视列表，用来刷新别人
 	delete aoiObj;
 	mObjVec.erase(_id);
-	return ret; //返回自己的可视列表，用来刷新别人
 }
 
-void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _nList, std::map<int, int>& _uList, std::map<int, int>& _oList)
+void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<int, int>& _uList, std::map<int, int>& _rList)
 {
-	auto iter = mObjVec.find(_id);
+	auto iter = mObjVec.find(_id); //TODO: Update待优化
 	if (iter == mObjVec.end())
 		return;
 
@@ -98,42 +91,45 @@ void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _nList, std::map<
 	else
 		mTree->Remove(_id);
 
-	_oList = aoiObj->mList;
+	_rList = aoiObj->mList;
 	CQuadTree* tree = mTree->Insert(_id, _x, _y);
 	if (tree == nullptr)
 		return;
 
 	aoiObj->mX = _x;
 	aoiObj->mY = _y;
+	aoiObj->mTree = tree; //更新自己所在的树
 
 	std::vector<int> result;
-	mTree->Query(_id, _x - mRadius, _y - mRadius, _x + mRadius, _y + mRadius, result);
+	mTree->Query(_id, _x - mRadius, _y + mRadius, _x + mRadius, _y - mRadius, result);
 
 	for (int id : result)
 	{
-		_nList.insert(std::make_pair(id, id));
+		_aList.insert(std::make_pair(id, id));
 
-		auto iter = _oList.find(id);
-		if (iter != _oList.end())
+		auto iter = _rList.find(id);
+		if (iter != _rList.end())
 		{
 			_uList.insert(std::make_pair(id, id));
-			_oList.erase(iter);
+			_rList.erase(iter);
 		}
 	}
 
 	for (auto iter = _uList.begin(); iter != _uList.end(); ++iter)
 	{
-		auto it = _nList.find(iter->second);
-		if (it != _nList.end())
-			_nList.erase(it);
+		auto it = _aList.find(iter->second);
+		if (it != _aList.end())
+			_aList.erase(it);
 	}
 
 	aoiObj->mList.clear();
-	for (auto iter = _nList.begin(); iter != _nList.end(); ++iter)
+	for (auto iter = _aList.begin(); iter != _aList.end(); ++iter)
 		aoiObj->mList.insert(std::make_pair(iter->second, iter->second));
 
 	for (auto iter = _uList.begin(); iter != _uList.end(); ++iter)
 		aoiObj->mList.insert(std::make_pair(iter->second, iter->second));
+
+	int a = 1;
 }
 
 SAoiObj* CAoi::GetAoiObj(int _id)

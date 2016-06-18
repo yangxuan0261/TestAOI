@@ -9,6 +9,15 @@ class CAgent;
 class CAoi;
 class CQuadTree;
 
+enum class ENotifyType : int
+{
+	None = 0,
+	Add,
+	Update,
+	Remove,
+	Reset,
+};
+
 class HelloWorld : public cocos2d::Layer
 {
 public:
@@ -25,14 +34,20 @@ public:
 	void AddAgents(int _num);
 	void DelAgents(int _num);
 	void SelectAgent(CAgent* _agent);
-	void RefreshAoiInfo(CAgent* _agent);
+	void RefreshAoiInfo();
 	void RefreshBigMapInfo();
 	void MoveAgent(CAgent* _agent);
 	void ChangeRange(int _range);
+	void SimulateBorn();
+
+	//-------- draw line and point
 	void DrawRange();
 	void DrawAoiTree();
 	void DrawTree(CQuadTree* _tree);
+	void DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList);
 
+	//--- auto move
+	void AutoMove(bool _b);
 private:
 	cocos2d::ui::Layout*	_layout;
 
@@ -48,8 +63,10 @@ private:
 	cocos2d::ui::TextField*	mTFAdd;
 	cocos2d::ui::TextField*	mTFDel;
 
-	std::vector<CAgent*>	mAgentBigVec;
-	std::vector<CAgent*>	mAgentAoiVec;
+	std::map<int, CAgent*>	mAgentBigVec;
+	std::map<int, CAgent*>	mAgentAoiVec;
+
+	bool	mShowTree;
 
 	CAgent*	mSelAgent;
 	cocos2d::DrawNode*		mDrawRange;

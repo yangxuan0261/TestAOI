@@ -4,7 +4,6 @@
 #include <vector>
 #include <map>
 
-const static int gDepthMax = 5;
 class CQuadTree;
 
 struct SAoiObj
@@ -24,8 +23,8 @@ public:
 	virtual ~CAoi();
 
 	void	Init(int _left, int _top, int _right, int _bottom, int _radius);
-	std::map<int, int>	Insert(int _id, int _x, int _y);
-	std::map<int, int>	Remove(int _id);
+	void	Insert(int _id, int _x, int _y, std::map<int, int>& _notiList);
+	void	Remove(int _id, std::map<int, int>& _notiList);
 	void	Update(int _id, int _x, int _y, std::map<int, int>& _nList, std::map<int, int>& _uList, std::map<int, int>& _oList);
 	SAoiObj*	GetAoiObj(int _id);
 	CQuadTree*	GetTree() const { return mTree; }

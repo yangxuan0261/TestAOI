@@ -22,8 +22,8 @@ public:
 	CQuadTree(int _l, int _t, int _r, int _b, CQuadTree* _parent);
 	virtual ~CQuadTree();
 
+	void			genChildren();
 	CQuadTree*		Insert(int _id, int _x, int _y);
-	CQuadTree*		Subdivide(int _last);
 	bool			Remove(int _id);
 	void			Query(int _id, int _left, int _top, int _right, int _bottom, std::vector<int>& _result);
 	const std::vector<CQuadTree*>&	GetChildren() { return mChildren; }
