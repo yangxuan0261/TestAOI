@@ -8,6 +8,7 @@
 class CAgent;
 class CAoi;
 class CQuadTree;
+class COrthList;
 
 enum class ENotifyType : int
 {
@@ -72,7 +73,9 @@ private:
 	cocos2d::DrawNode*		mDrawRange;
 	cocos2d::DrawNode*		mDrawTree;
 
-	CAoi*		mAoi;
+	//CAoi*		mAoi;
+
+	COrthList*	mOrthList;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

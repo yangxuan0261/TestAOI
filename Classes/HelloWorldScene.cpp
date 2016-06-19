@@ -4,6 +4,7 @@
 #include "Agent.h"
 #include "AOI/Aoi.h"
 #include "AOI/QuadTree.h"
+#include "AOI/OrthList.h"
 
 #include <time.h>
 #include <random>
@@ -24,6 +25,13 @@ static std::uniform_int_distribution<int> distInt(0, 600);
 static const int gRange = 100;
 
 static std::uniform_int_distribution<int> distIntMove(-80, 80);
+
+//--- test
+std::vector<Vec2> testPoint = {
+	Vec2(250, 310),
+	Vec2(310, 310),
+	Vec2(320, 310)
+};
 
 Scene* HelloWorld::createScene()
 {
@@ -89,7 +97,9 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
 void HelloWorld::InitDisplay()
 {
-	mAoi = new CAoi();
+	//mAoi = new CAoi();
+	mOrthList = new COrthList((10 + 600) >> 1, (10 + 600) >> 1, 100);
+
 	mSelAgent = nullptr;
 	mShowTree = true;
 	//--- draw node init
@@ -100,7 +110,7 @@ void HelloWorld::InitDisplay()
 	mDrawTree = DrawNode::create();
 	this->addChild(mDrawTree, 100);
 
-	mAoi->Init(GAP, GAP + 600, GAP + 600, GAP, gRange);
+	//mAoi->Init(GAP, GAP + 600, GAP + 600, GAP, gRange);
 	_layout = static_cast<Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/Display.json"));
 	this->addChild(_layout);
 
@@ -247,7 +257,6 @@ void HelloWorld::AddAgents(int _num)
 			agent->setColor(Color3B::BLACK);
 
 			agent->SetCallback(selFunc, moveFunc);
-			agent->SetRange(100);
 			float x = (float)distInt(generator1); //testPoint[i].x;
 			float y = (float)distInt(generator1); //testPoint[i].y;
 			agent->setPosition(Vec2(x, y));
@@ -256,8 +265,9 @@ void HelloWorld::AddAgents(int _num)
 			agent->SetClamp(Rect(bigMapPos.x, bigMapPos.y, bigMapSize.width, bigMapSize.height));
 
 			std::map<int, int> notiList;
-			mAoi->Insert(agent->GetId(), x, y, notiList);
-			//DrawNotifyTarget(ENotifyType::Add, notiList);
+
+			//mAoi->Insert(agent->GetId(), x, y, notiList);
+			mOrthList->Insert(agent->GetId(), x, y, notiList);
 		}
 	}
 
@@ -279,7 +289,10 @@ void HelloWorld::DelAgents(int _num)
 
 		agent = iter->second;
 		std::map<int, int> notiList;
-		mAoi->Remove(agent->GetId(), notiList);
+
+		//mAoi->Remove(agent->GetId(), notiList);
+		mOrthList->Remove(agent->GetId(), notiList);
+
 		agent->removeFromParent();
 
 		if (mSelAgent == agent) //删除选中对象
@@ -299,7 +312,7 @@ void HelloWorld::update(float delta)
 	Layer::update(delta);
 
 
-	DrawAoiTree();
+	//DrawAoiTree();
 	RefreshAoiInfo();
 	DrawRange();
 }
@@ -316,20 +329,20 @@ void HelloWorld::SelectAgent(CAgent* _agent)
 	mSelAgent->setColor(Color3B::RED);
 	mDrawRange->setVisible(true);
 
-	SimulateBorn();
+	//SimulateBorn();
 }
 
 //模拟生成agent
 void HelloWorld::SimulateBorn()
 {
-	Vec2 pos = mSelAgent->getPosition();
-	std::vector<int> notiList;
-	mAoi->GetTree()->Query(mSelAgent->GetId(), pos.x - gRange, pos.y + gRange, pos.x + gRange, pos.y - gRange, notiList);
-	std::map<int, int> notiMap;
-	for (int id : notiList)
-		notiMap.insert(std::make_pair(id, id));
+	//Vec2 pos = mSelAgent->getPosition();
+	//std::vector<int> notiList;
+	//mAoi->GetTree()->Query(mSelAgent->GetId(), pos.x - gRange, pos.y + gRange, pos.x + gRange, pos.y - gRange, notiList);
+	//std::map<int, int> notiMap;
+	//for (int id : notiList)
+	//	notiMap.insert(std::make_pair(id, id));
 
-	DrawNotifyTarget(ENotifyType::Add, notiMap);
+	//DrawNotifyTarget(ENotifyType::Add, notiMap);
 }
 
 void HelloWorld::MoveAgent(CAgent* _agent)
@@ -339,7 +352,7 @@ void HelloWorld::MoveAgent(CAgent* _agent)
 	std::map<int, int> updateList;
 	std::map<int, int> removeList;
 	Vec2 pos = _agent->getPosition();
-	mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
+	//mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
 
 	DrawNotifyTarget(ENotifyType::Add, addList);
 	DrawNotifyTarget(ENotifyType::Update, updateList);
@@ -361,32 +374,44 @@ void HelloWorld::RefreshAoiInfo()
 		return;
 
 	CAgent* _agent = mSelAgent;
-	SAoiObj* aoiObj = mAoi->GetAoiObj(_agent->GetId());
 
-	String* str = String::createWithFormat("id:%d", aoiObj->mId);
+	//SAoiObj* aoiObj = mAoi->GetAoiObj(_agent->GetId());
+	SListObj* aoiObj = mOrthList->GetAoiObj(_agent->GetId());
+
+	int id = aoiObj->mId;
+	int range = mOrthList->GetRange();
+	int size = aoiObj->mList.size();
+	int x = aoiObj->mX;
+	int y = aoiObj->mY;
+
+	String* str = String::createWithFormat("id:%d", id);
 	mAoiId->setString(str->getCString());
 
-	str = String::createWithFormat("range:%d", _agent->GetRange()); //TODO: 范围应该在SAoiObj中
+	str = String::createWithFormat("range:%d", range); //TODO: 范围应该在SAoiObj中
 	mAoiRange->setString(str->getCString());
 
-	str = String::createWithFormat("entities:%d\n", aoiObj->mList.size());
+	str = String::createWithFormat("entities:%d\n", size);
 	//mAoiEntitiesNum->setString(str->getCString());
 
-	Vec2 pos = _agent->getPosition();
-	str = String::createWithFormat("%spos:(%d, %d)", str->getCString(), aoiObj->mX, aoiObj->mY);
+	str = String::createWithFormat("%spos:(%d, %d)", str->getCString(), x, y);
 	mAoiEntitiesNum->setString(str->getCString());
+
 }
 
 void HelloWorld::RefreshBigMapInfo()
 {
-	String* str = String::createWithFormat("entities:%d, depth:%d", mAgentBigVec.size(), mAoi->GetDepth());
+	//String* str = String::createWithFormat("entities:%d, depth:%d", mAgentBigVec.size(), mAoi->GetDepth());
+	String* str = String::createWithFormat("entities:%d", mAgentBigVec.size());
 	mBigEntitiesNum->setString(str->getCString());
 }
 
 HelloWorld::~HelloWorld()
 {
-	if (mAoi)
-		delete mAoi;
+	//if (mAoi)
+	//	delete mAoi;
+
+	if (mOrthList)
+		delete mOrthList;
 }
 
 void HelloWorld::DrawRange()
@@ -396,7 +421,8 @@ void HelloWorld::DrawRange()
 
 	CAgent* agent = mSelAgent;
 	Vec2 pos = agent->getPosition();
-	int range = agent->GetRange();
+	//int range = mAoi->GetRange();
+	int range = mOrthList->GetRange();
 	Vec2 lt(pos.x - range, pos.y + range);
 	Vec2 rb(pos.x + range, pos.y - range);
 	mDrawRange->clear();
@@ -405,9 +431,9 @@ void HelloWorld::DrawRange()
 
 void HelloWorld::DrawAoiTree()
 {
-	mDrawTree->clear();
-	if (mShowTree)
-		DrawTree(mAoi->GetTree());
+	//mDrawTree->clear();
+	//if (mShowTree)
+	//	DrawTree(mAoi->GetTree());
 }
 
 void HelloWorld::DrawTree(CQuadTree* _tree)

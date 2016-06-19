@@ -29,6 +29,7 @@ public:
 	SAoiObj*	GetAoiObj(int _id);
 	CQuadTree*	GetTree() const { return mTree; }
 	int			GetDepth();
+	int			GetRange() const { return mRadius; }
 	void		CaculDepth(int& _depth, CQuadTree* _tree);
 
 private:
