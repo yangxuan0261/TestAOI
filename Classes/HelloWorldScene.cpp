@@ -14,7 +14,7 @@ using namespace cocos2d::ui;
 using namespace std;
 
 static const int GAP = 10;
-static const std::string gSprFile = "slider_bar_button.png";
+static const std::string gSprFile = "slider_bar_button2.png";
 static int gId = 1;
 static int IdGenerator() { return gId++; }
 static int gBigMapWidth = 600;

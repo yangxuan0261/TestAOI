@@ -33,7 +33,7 @@ public:
 
 private:
 	CQuadTree*	mTree;
-	std::map<int, SAoiObj*>	mObjVec;
+	std::map<int, SAoiObj*>	mObjMap;
 	int			mRadius;
 };
 

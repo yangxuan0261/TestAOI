@@ -20,7 +20,7 @@ void CAoi::Init(int _left, int _top, int _right, int _bottom, int _radius)
 
 void CAoi::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
 {
-	if (mObjVec.find(_id) != mObjVec.end()) //已存在，直接返回
+	if (mObjMap.find(_id) != mObjMap.end()) //已存在，直接返回
 		return;
 
 	CQuadTree* tree = mTree->Insert(_id, _x, _y); //返回自己所在的树
@@ -33,8 +33,8 @@ void CAoi::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
 	//相同range情况下，自己能看到别人，别人自然能看到自己，把自己添加到别人的可视列表中
 	for (int id : result) 
 	{
-		auto iter = mObjVec.find(id);
-		if (iter != mObjVec.end())
+		auto iter = mObjMap.find(id);
+		if (iter != mObjMap.end())
 		{
 			_notiList.insert(std::make_pair(id, id)); //返回自己的可视列表，用来刷新别人
 			iter->second->mList.insert(std::make_pair(_id, _id));
@@ -47,13 +47,13 @@ void CAoi::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
 	aoiObj->mY = _y;
 	aoiObj->mTree = tree; //自己所在的树，为了删除是能更快删除
 	aoiObj->mList = _notiList; //自己可视的列表
-	mObjVec.insert(std::make_pair(_id, aoiObj));
+	mObjMap.insert(std::make_pair(_id, aoiObj));
 }
 
 void CAoi::Remove(int _id, std::map<int, int>& _notiList)
 {
-	auto iter = mObjVec.find(_id);
-	if (iter == mObjVec.end())
+	auto iter = mObjMap.find(_id);
+	if (iter == mObjMap.end())
 		return;
 
 	SAoiObj* aoiObj = iter->second;
@@ -64,8 +64,8 @@ void CAoi::Remove(int _id, std::map<int, int>& _notiList)
 	for (auto iter = aoiObj->mList.begin(); iter != aoiObj->mList.end(); ++iter)
 	{
 		int id = iter->second;
-		auto it = mObjVec.find(id);
-		if (it != mObjVec.end())
+		auto it = mObjMap.find(id);
+		if (it != mObjMap.end())
 		{
 			std::map<int, int>& list = it->second->mList;
 			auto listIt = list.find(_id);
@@ -76,13 +76,13 @@ void CAoi::Remove(int _id, std::map<int, int>& _notiList)
 
 	_notiList = aoiObj->mList; //返回自己的可视列表，用来刷新别人
 	delete aoiObj;
-	mObjVec.erase(_id);
+	mObjMap.erase(_id);
 }
 
 void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<int, int>& _uList, std::map<int, int>& _rList)
 {
-	auto iter = mObjVec.find(_id); //TODO: Update待优化
-	if (iter == mObjVec.end())
+	auto iter = mObjMap.find(_id); //TODO: Update待优化
+	if (iter == mObjMap.end())
 		return;
 
 	SAoiObj* aoiObj = iter->second;
@@ -134,8 +134,8 @@ void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<
 
 SAoiObj* CAoi::GetAoiObj(int _id)
 {
-	auto iter = mObjVec.find(_id);
-	return iter != mObjVec.end() ? iter->second : nullptr;
+	auto iter = mObjMap.find(_id);
+	return iter != mObjMap.end() ? iter->second : nullptr;
 }
 
 int CAoi::GetDepth()
