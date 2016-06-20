@@ -38,7 +38,7 @@ public:
 
 	bool		_insertStep(SListObj* _dstObj, SListObj* _srcObj, bool isPre);
 	void		_queryStep(SListObj* _dstObj, SListObj* _srcObj, bool isPre, std::vector<int>& _result);
-	void		_adjustStep();
+	void		_adjustStep(SListObj* _srcObj, int _newX, int _newY);
 public:
 	SListObj*		mRoot;
 	int				mRadius;

@@ -128,8 +128,6 @@ void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<
 
 	for (auto iter = _uList.begin(); iter != _uList.end(); ++iter)
 		aoiObj->mList.insert(std::make_pair(iter->second, iter->second));
-
-	int a = 1;
 }
 
 SAoiObj* CAoi::GetAoiObj(int _id)

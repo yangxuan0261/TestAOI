@@ -80,13 +80,38 @@ void COrthList::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std:
 	SListObj* aoiObj = iter->second;
 	_rList = aoiObj->mList; //原有可视列表
 
-	_adjustStep(); //调整链表
-	aoiObj->mX = _x;
-	aoiObj->mY = _y;
+
+
+	_adjustStep(aoiObj, _x, _y); //调整链表
 
 	std::vector<int> result;
 	Query(aoiObj->mId, result);
 
+	for (int id : result)
+	{
+		_aList.insert(std::make_pair(id, id));
+
+		auto iter = _rList.find(id);
+		if (iter != _rList.end())
+		{
+			_uList.insert(std::make_pair(id, id));
+			_rList.erase(iter);
+		}
+	}
+
+	for (auto iter = _uList.begin(); iter != _uList.end(); ++iter)
+	{
+		auto it = _aList.find(iter->second);
+		if (it != _aList.end())
+			_aList.erase(it);
+	}
+
+	aoiObj->mList.clear();
+	for (auto iter = _aList.begin(); iter != _aList.end(); ++iter)
+		aoiObj->mList.insert(std::make_pair(iter->second, iter->second));
+
+	for (auto iter = _uList.begin(); iter != _uList.end(); ++iter)
+		aoiObj->mList.insert(std::make_pair(iter->second, iter->second));
 }
 
 void COrthList::Query(int _id, std::vector<int>& _result)
@@ -178,6 +203,12 @@ void COrthList::_queryStep(SListObj* _dstObj, SListObj* _srcObj, bool isPre, std
 		{
 			if (abs(_dstObj->mY - _srcObj->mY) <= mRadius) //y 在范围内
 				_result.push_back(_dstObj->mId);
+			
+			//TODO: test 
+			if (_result.size() > 5)
+			{
+				int a = 1;
+			}
 		}
 		else //超过范围则不继续检索
 			return;
@@ -185,30 +216,49 @@ void COrthList::_queryStep(SListObj* _dstObj, SListObj* _srcObj, bool isPre, std
 
 	SListObj* nextObj = isPre ? _dstObj->preObj : _dstObj->nextObj;
 	_queryStep(nextObj, _srcObj, isPre, _result);
-
-	//if (isPre)
-	//{
-	//	if (abs(_dstObj->mX - _srcObj->mX) <= mRadius) //x 在范围内
-	//	{
-	//		if (abs(_dstObj->mY - _srcObj->mY) <= mRadius) //y 在范围内
-	//			_result.push_back(_dstObj->mId);
-	//	}
-	//	else
-	//	{
-	//		return;
-	//	}
-
-	//	_queryStep(_dstObj->preObj, _srcObj, isPre, _result);
-	//}
-	//else
-	//{
-	//	_queryStep(_dstObj->nextObj, _srcObj, isPre, _result);
-
-	//}
 }
 
-void COrthList::_adjustStep()
+//移动是调整链表
+void COrthList::_adjustStep(SListObj* _srcObj, int _newX, int _newY)
 {
+	_srcObj->mY = _newY;
+	if (_newX == _srcObj->mX) //x 不变
+		return;
 
+	bool isPre = _newX - _srcObj->mX < 0 ? true : false;
+	_srcObj->mX = _newX;
+
+	if (isPre)
+	{
+		if (_srcObj->preObj == nullptr)
+			return;
+		else if (_srcObj->preObj->mX < _newX) //移动没超过邻近节点
+			return;
+		else
+		{
+			//断掉当前链接，重新插入
+			_srcObj->preObj->nextObj = _srcObj->nextObj;
+			if (_srcObj->nextObj != nullptr)
+				_srcObj->nextObj->preObj = _srcObj->preObj;
+
+			_insertStep(_srcObj->preObj, _srcObj, isPre);
+		}
+	}
+	else
+	{
+		if (_srcObj->nextObj == nullptr)
+			return;
+		else if (_srcObj->nextObj->mX > _newX) //移动没超过邻近节点
+			return;
+		else
+		{
+			//断掉当前链接，重新插入
+			_srcObj->nextObj->preObj = _srcObj->preObj;
+			if (_srcObj->preObj != nullptr)
+				_srcObj->preObj->nextObj = _srcObj->nextObj;
+
+			_insertStep(_srcObj->nextObj, _srcObj, isPre);
+		}
+	}
 }
 

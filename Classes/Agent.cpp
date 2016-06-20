@@ -30,6 +30,13 @@ CAgent * CAgent::Create(const std::string & filename, int _id)
 
 void CAgent::MyInit()
 {
+	Size size = getContentSize();
+	mLblId = LabelTTF::create();
+	mLblId->setString(String::createWithFormat("%d", mId)->getCString());
+	mLblId->setPosition(Vec2(size.width * 0.5, size.height * 0.5));
+	this->addChild(mLblId);
+
+
 	auto listener = EventListenerTouchOneByOne::create();
 	listener->setSwallowTouches(true);
 

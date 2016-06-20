@@ -329,20 +329,21 @@ void HelloWorld::SelectAgent(CAgent* _agent)
 	mSelAgent->setColor(Color3B::RED);
 	mDrawRange->setVisible(true);
 
-	//SimulateBorn();
+	SimulateBorn();
 }
 
 //Ä£ÄâÉú³Éagent
 void HelloWorld::SimulateBorn()
 {
-	//Vec2 pos = mSelAgent->getPosition();
-	//std::vector<int> notiList;
+	Vec2 pos = mSelAgent->getPosition();
+	std::vector<int> notiList;
 	//mAoi->GetTree()->Query(mSelAgent->GetId(), pos.x - gRange, pos.y + gRange, pos.x + gRange, pos.y - gRange, notiList);
-	//std::map<int, int> notiMap;
-	//for (int id : notiList)
-	//	notiMap.insert(std::make_pair(id, id));
+	mOrthList->Query(mSelAgent->GetId(), notiList);
+	std::map<int, int> notiMap;
+	for (int id : notiList)
+		notiMap.insert(std::make_pair(id, id));
 
-	//DrawNotifyTarget(ENotifyType::Add, notiMap);
+	DrawNotifyTarget(ENotifyType::Add, notiMap);
 }
 
 void HelloWorld::MoveAgent(CAgent* _agent)
@@ -353,7 +354,8 @@ void HelloWorld::MoveAgent(CAgent* _agent)
 	std::map<int, int> removeList;
 	Vec2 pos = _agent->getPosition();
 	//mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
-
+	mOrthList->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
+	
 	DrawNotifyTarget(ENotifyType::Add, addList);
 	DrawNotifyTarget(ENotifyType::Update, updateList);
 	DrawNotifyTarget(ENotifyType::Remove, removeList);

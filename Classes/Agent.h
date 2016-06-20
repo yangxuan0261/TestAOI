@@ -25,6 +25,8 @@ private:
 	cocos2d::Rect mClampBox;
 	AgentCallback	mSelCallback;
 	AgentCallback	mMoveCallback;
+
+	cocos2d::LabelTTF*	mLblId;
 };
 
 #endif
