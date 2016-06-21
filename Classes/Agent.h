@@ -12,6 +12,8 @@ public:
 	CAgent();
 	virtual ~CAgent();
 	static CAgent* Create(const std::string& filename, int _id);
+	virtual void update(float delta);
+
 	void	MyInit();
 	void	SetClamp(const cocos2d::Rect& _clamp) { mClampBox = _clamp; }
 	int		GetRange() const { return mRange; }

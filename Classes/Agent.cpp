@@ -77,12 +77,17 @@ void CAgent::MyInit()
 	};
 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-	//_eventDispatcher->addEventListenerWithFixedPriority(listener, 30);
 
+	//this->scheduleUpdate();
 }
 
 void CAgent::SetCallback(AgentCallback _sel, AgentCallback _move)
 {
 	mSelCallback = _sel;
 	mMoveCallback = _move;
+}
+
+void CAgent::update(float delta)
+{
+	mMoveCallback(this);
 }

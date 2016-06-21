@@ -22,9 +22,10 @@ static int gBigMapWidth = 600;
 
 static std::default_random_engine generator1(time(NULL)); // mersenne_twister_engine 梅森旋转法
 static std::uniform_int_distribution<int> distInt(0, 600);
+static std::uniform_real_distribution<float> distFloat(0.f, 1.f);
 static const int gRange = 100;
 
-static std::uniform_int_distribution<int> distIntMove(-80, 80);
+static std::uniform_int_distribution<int> distIntMove(-10, 10);
 
 //--- test
 std::vector<Vec2> testPoint = {
@@ -348,7 +349,6 @@ void HelloWorld::SimulateBorn()
 
 void HelloWorld::MoveAgent(CAgent* _agent)
 {
-	CCLOG("--- HelloWorld::MoveAgent, moving, id:%d", _agent->GetId());
 	std::map<int, int> addList;
 	std::map<int, int> updateList;
 	std::map<int, int> removeList;
@@ -356,9 +356,14 @@ void HelloWorld::MoveAgent(CAgent* _agent)
 	mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
 	//mOrthList->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
 	
-	DrawNotifyTarget(ENotifyType::Add, addList);
-	DrawNotifyTarget(ENotifyType::Update, updateList);
-	DrawNotifyTarget(ENotifyType::Remove, removeList);
+	if (_agent != mSelAgent)
+		return; //只显示选中对象
+
+	CCLOG("--- HelloWorld::MoveAgent, moving, id:%d", _agent->GetId());
+
+	DrawNotifyTarget(ENotifyType::Add, addList, _agent);
+	DrawNotifyTarget(ENotifyType::Update, updateList, _agent);
+	DrawNotifyTarget(ENotifyType::Remove, removeList, _agent);
 }
 
 void HelloWorld::ChangeRange(int _range)
@@ -458,8 +463,11 @@ void HelloWorld::DrawTree(CQuadTree* _tree)
 	}
 }
 
-void HelloWorld::DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList)
+void HelloWorld::DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList, CAgent* _target /* = nullptr */)
 {
+	if (_target == nullptr || _target != mSelAgent)
+		return; //只显示选中对象
+
 	if (_type == ENotifyType::Reset)
 	{
 		for (auto iter = mAgentBigVec.begin(); iter != mAgentBigVec.end(); ++iter)
@@ -485,38 +493,42 @@ void HelloWorld::DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiLi
 
 void HelloWorld::AutoMove(bool _b)
 {
-	if (mSelAgent == nullptr)
-		return;
+	for (auto iter = mAgentBigVec.begin(); iter != mAgentBigVec.end(); ++iter)
+	{
+		Move(iter->second, _b);
+	}
+}
 
-	CAgent* agent = mSelAgent;
+void HelloWorld::Move(CAgent* _agent, bool _move)
+{
+	CAgent* agent = _agent;
 
-	if (!_b)
+	if (!_move)
 	{
 		agent->stopAllActions();
 		return;
 	}
 
-	auto tickFunc = [&](float _dt)->void {
-		MoveAgent(mSelAgent);
-	};
-
-	auto callFunc = [&]()->void {
-		AutoMove(true);
+	auto callFunc = [&](Node* _obj)->void {
+		CAgent* ag = (CAgent*)_obj;
+		//MoveAgent(ag);
+		Move(ag, true);
 	};
 
 	auto caculPointFunc = [&]()->Vec2 { //限制不让超出框
 		float dtX = distIntMove(generator1);
 		float dtY = distIntMove(generator1);
-		Vec2 pos = mSelAgent->getPosition();
+		Vec2 pos = agent->getPosition();
 		dtX = clampf(dtX, 10.f - pos.x, 610.f - pos.x);
 		dtY = clampf(dtY, 10.f - pos.y, 610.f - pos.y);
 		return Vec2(dtX, dtY);
 	};
 
-	float time = 0.3f;
-	ActionFloat* tick = ActionFloat::create(time, 0.f, 100.f, tickFunc);
+	float time = 0.05f;
+	float dt = distFloat(generator1);
+	DelayTime* delay = DelayTime::create(dt);
 	MoveBy* move = MoveBy::create(time, caculPointFunc());
-	CallFunc* call = CallFunc::create(callFunc);
-	Sequence* seq = Sequence::create(move, tick , call, nullptr);
+	CallFuncN* call = CallFuncN::create(callFunc);
+	Sequence* seq = Sequence::create(delay, move, call, nullptr);
 	agent->runAction(seq);
 }

@@ -45,10 +45,12 @@ public:
 	void DrawRange();
 	void DrawAoiTree();
 	void DrawTree(CQuadTree* _tree);
-	void DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList);
+	void DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList, CAgent* _target = nullptr);
 
 	//--- auto move
 	void AutoMove(bool _b);
+	void Move(CAgent* _agent, bool _move);
+
 private:
 	cocos2d::ui::Layout*	_layout;
 
