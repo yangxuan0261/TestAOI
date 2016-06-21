@@ -97,8 +97,8 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
 void HelloWorld::InitDisplay()
 {
-	//mAoi = new CAoi();
-	mOrthList = new COrthList((10 + 600) >> 1, (10 + 600) >> 1, 100);
+	mAoi = new CAoi();
+	//mOrthList = new COrthList((10 + 600) >> 1, (10 + 600) >> 1, 100);
 
 	mSelAgent = nullptr;
 	mShowTree = true;
@@ -110,7 +110,7 @@ void HelloWorld::InitDisplay()
 	mDrawTree = DrawNode::create();
 	this->addChild(mDrawTree, 100);
 
-	//mAoi->Init(GAP, GAP + 600, GAP + 600, GAP, gRange);
+	mAoi->Init(GAP, GAP + 600, GAP + 600, GAP, gRange);
 	_layout = static_cast<Layout*>(cocostudio::GUIReader::getInstance()->widgetFromJsonFile("ui/Display.json"));
 	this->addChild(_layout);
 
@@ -266,8 +266,8 @@ void HelloWorld::AddAgents(int _num)
 
 			std::map<int, int> notiList;
 
-			//mAoi->Insert(agent->GetId(), x, y, notiList);
-			mOrthList->Insert(agent->GetId(), x, y, notiList);
+			mAoi->Insert(agent->GetId(), x, y, notiList);
+			//mOrthList->Insert(agent->GetId(), x, y, notiList);
 		}
 	}
 
@@ -290,8 +290,8 @@ void HelloWorld::DelAgents(int _num)
 		agent = iter->second;
 		std::map<int, int> notiList;
 
-		//mAoi->Remove(agent->GetId(), notiList);
-		mOrthList->Remove(agent->GetId(), notiList);
+		mAoi->Remove(agent->GetId(), notiList);
+		//mOrthList->Remove(agent->GetId(), notiList);
 
 		agent->removeFromParent();
 
@@ -337,8 +337,8 @@ void HelloWorld::SimulateBorn()
 {
 	Vec2 pos = mSelAgent->getPosition();
 	std::vector<int> notiList;
-	//mAoi->GetTree()->Query(mSelAgent->GetId(), pos.x - gRange, pos.y + gRange, pos.x + gRange, pos.y - gRange, notiList);
-	mOrthList->Query(mSelAgent->GetId(), notiList);
+	mAoi->GetTree()->Query(mSelAgent->GetId(), pos.x - gRange, pos.y + gRange, pos.x + gRange, pos.y - gRange, notiList);
+	//mOrthList->Query(mSelAgent->GetId(), notiList);
 	std::map<int, int> notiMap;
 	for (int id : notiList)
 		notiMap.insert(std::make_pair(id, id));
@@ -353,8 +353,8 @@ void HelloWorld::MoveAgent(CAgent* _agent)
 	std::map<int, int> updateList;
 	std::map<int, int> removeList;
 	Vec2 pos = _agent->getPosition();
-	//mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
-	mOrthList->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
+	mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
+	//mOrthList->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
 	
 	DrawNotifyTarget(ENotifyType::Add, addList);
 	DrawNotifyTarget(ENotifyType::Update, updateList);
@@ -377,11 +377,12 @@ void HelloWorld::RefreshAoiInfo()
 
 	CAgent* _agent = mSelAgent;
 
-	//SAoiObj* aoiObj = mAoi->GetAoiObj(_agent->GetId());
-	SListObj* aoiObj = mOrthList->GetAoiObj(_agent->GetId());
+	SAoiObj* aoiObj = mAoi->GetAoiObj(_agent->GetId());
+	//SListObj* aoiObj = mOrthList->GetAoiObj(_agent->GetId());
 
 	int id = aoiObj->mId;
-	int range = mOrthList->GetRange();
+	//int range = mOrthList->GetRange();
+	int range = mAoi->GetRange();
 	int size = aoiObj->mList.size();
 	int x = aoiObj->mX;
 	int y = aoiObj->mY;
@@ -402,18 +403,18 @@ void HelloWorld::RefreshAoiInfo()
 
 void HelloWorld::RefreshBigMapInfo()
 {
-	//String* str = String::createWithFormat("entities:%d, depth:%d", mAgentBigVec.size(), mAoi->GetDepth());
-	String* str = String::createWithFormat("entities:%d", mAgentBigVec.size());
+	String* str = String::createWithFormat("entities:%d, depth:%d", mAgentBigVec.size(), mAoi->GetDepth());
+	//String* str = String::createWithFormat("entities:%d", mAgentBigVec.size());
 	mBigEntitiesNum->setString(str->getCString());
 }
 
 HelloWorld::~HelloWorld()
 {
-	//if (mAoi)
-	//	delete mAoi;
+	if (mAoi)
+		delete mAoi;
 
-	if (mOrthList)
-		delete mOrthList;
+	//if (mOrthList)
+		//delete mOrthList;
 }
 
 void HelloWorld::DrawRange()
@@ -423,8 +424,8 @@ void HelloWorld::DrawRange()
 
 	CAgent* agent = mSelAgent;
 	Vec2 pos = agent->getPosition();
-	//int range = mAoi->GetRange();
-	int range = mOrthList->GetRange();
+	int range = mAoi->GetRange();
+	//int range = mOrthList->GetRange();
 	Vec2 lt(pos.x - range, pos.y + range);
 	Vec2 rb(pos.x + range, pos.y - range);
 	mDrawRange->clear();
@@ -433,9 +434,9 @@ void HelloWorld::DrawRange()
 
 void HelloWorld::DrawAoiTree()
 {
-	//mDrawTree->clear();
-	//if (mShowTree)
-	//	DrawTree(mAoi->GetTree());
+	mDrawTree->clear();
+	if (mShowTree)
+		DrawTree(mAoi->GetTree());
 }
 
 void HelloWorld::DrawTree(CQuadTree* _tree)

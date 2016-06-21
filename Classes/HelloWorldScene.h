@@ -73,9 +73,9 @@ private:
 	cocos2d::DrawNode*		mDrawRange;
 	cocos2d::DrawNode*		mDrawTree;
 
-	//CAoi*		mAoi;
+	CAoi*		mAoi;
 
-	COrthList*	mOrthList;
+	//COrthList*	mOrthList;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
