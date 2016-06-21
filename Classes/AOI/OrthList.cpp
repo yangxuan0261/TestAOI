@@ -203,12 +203,6 @@ void COrthList::_queryStep(SListObj* _dstObj, SListObj* _srcObj, bool isPre, std
 		{
 			if (abs(_dstObj->mY - _srcObj->mY) <= mRadius) //y 在范围内
 				_result.push_back(_dstObj->mId);
-			
-			//TODO: test 
-			if (_result.size() > 5)
-			{
-				int a = 1;
-			}
 		}
 		else //超过范围则不继续检索
 			return;
@@ -232,7 +226,7 @@ void COrthList::_adjustStep(SListObj* _srcObj, int _newX, int _newY)
 	{
 		if (_srcObj->preObj == nullptr)
 			return;
-		else if (_srcObj->preObj->mX < _newX) //移动没超过邻近节点
+		else if (_srcObj->preObj->mX < _srcObj->mX) //移动没超过邻近节点
 			return;
 		else
 		{
@@ -241,14 +235,17 @@ void COrthList::_adjustStep(SListObj* _srcObj, int _newX, int _newY)
 			if (_srcObj->nextObj != nullptr)
 				_srcObj->nextObj->preObj = _srcObj->preObj;
 
-			_insertStep(_srcObj->preObj, _srcObj, isPre);
+			SListObj* preObj = _srcObj->preObj;
+			_srcObj->preObj = nullptr;
+			_srcObj->nextObj = nullptr;
+			_insertStep(preObj, _srcObj, isPre);
 		}
 	}
 	else
 	{
 		if (_srcObj->nextObj == nullptr)
 			return;
-		else if (_srcObj->nextObj->mX > _newX) //移动没超过邻近节点
+		else if (_srcObj->nextObj->mX > _srcObj->mX) //移动没超过邻近节点
 			return;
 		else
 		{
@@ -257,8 +254,10 @@ void COrthList::_adjustStep(SListObj* _srcObj, int _newX, int _newY)
 			if (_srcObj->preObj != nullptr)
 				_srcObj->preObj->nextObj = _srcObj->nextObj;
 
-			_insertStep(_srcObj->nextObj, _srcObj, isPre);
+			SListObj* nextObj = _srcObj->nextObj;
+			_srcObj->preObj = nullptr;
+			_srcObj->nextObj = nullptr;
+			_insertStep(nextObj, _srcObj, isPre);
 		}
 	}
 }
-
