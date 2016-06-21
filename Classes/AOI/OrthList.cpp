@@ -14,7 +14,7 @@ COrthList::~COrthList()
 		delete mRoot;
 }
 
-void COrthList::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
+void COrthList::Insert(int _id, int _x, int _y, std::unordered_map<int, int>& _notiList)
 {
 	bool isPre = mRoot->mX >= _x ? true : false;
 	SListObj* newObj = new SListObj(_id, _x, _y);
@@ -26,18 +26,15 @@ void COrthList::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
 
 	for (int id : result)
 	{
-		auto iter = mObjMap.find(id);
-		if (iter != mObjMap.end())
-		{
-			_notiList.insert(std::make_pair(id, id)); //返回自己的可视列表，用来刷新别人
-			iter->second->mList.insert(std::make_pair(_id, _id));
-		}
+		SListObj* other = mObjMap[id];
+		_notiList.insert(std::make_pair(id, id)); //返回自己的可视列表，用来刷新别人
+		other->mList.insert(std::make_pair(_id, _id));
 	}
 
 	newObj->mList = _notiList;
 }
 
-void COrthList::Remove(int _id, std::map<int, int>& _notiList)
+void COrthList::Remove(int _id, std::unordered_map<int, int>& _notiList)
 {
 	auto iter = mObjMap.find(_id);
 	if (iter == mObjMap.end())
@@ -60,7 +57,7 @@ void COrthList::Remove(int _id, std::map<int, int>& _notiList)
 		auto it = mObjMap.find(id);
 		if (it != mObjMap.end())
 		{
-			std::map<int, int>& list = it->second->mList;
+			std::unordered_map<int, int>& list = it->second->mList;
 			auto listIt = list.find(_id);
 			if (listIt != list.end())
 				list.erase(listIt);
@@ -71,16 +68,10 @@ void COrthList::Remove(int _id, std::map<int, int>& _notiList)
 	mObjMap.erase(iter);
 }
 
-void COrthList::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<int, int>& _uList, std::map<int, int>& _rList)
+void COrthList::Update(int _id, int _x, int _y, std::unordered_map<int, int>& _aList, std::unordered_map<int, int>& _uList, std::unordered_map<int, int>& _rList)
 {
-	auto iter = mObjMap.find(_id);
-	if (iter == mObjMap.end())
-		return;
-
-	SListObj* aoiObj = iter->second;
+	SListObj* aoiObj = mObjMap[_id];
 	_rList = aoiObj->mList; //原有可视列表
-
-
 
 	_adjustStep(aoiObj, _x, _y); //调整链表
 
@@ -97,6 +88,7 @@ void COrthList::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std:
 			_uList.insert(std::make_pair(id, id));
 			_rList.erase(iter);
 		}
+
 	}
 
 	for (auto iter = _uList.begin(); iter != _uList.end(); ++iter)
@@ -116,11 +108,7 @@ void COrthList::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std:
 
 void COrthList::Query(int _id, std::vector<int>& _result)
 {
-	auto iter = mObjMap.find(_id);
-	if (iter == mObjMap.end())
-		return;
-
-	SListObj* listObj = iter->second; //左右开工
+	SListObj* listObj = mObjMap[_id]; //左右开工
 	_queryStep(listObj->preObj, listObj, true, _result);
 	_queryStep(listObj->nextObj, listObj, false, _result);
 }

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 struct SListObj
 {
@@ -19,7 +20,7 @@ struct SListObj
 	int mY;
 	SListObj* preObj;
 	SListObj* nextObj;
-	std::map<int, int> mList;
+	std::unordered_map<int, int> mList;
 };
 
 class COrthList
@@ -28,9 +29,9 @@ public:
 	COrthList(int _centerX, int _centerY, int _raduis);
 	virtual ~COrthList();
 
-	void		Insert(int _id, int _x, int _y, std::map<int, int>& _notiList);
-	void		Remove(int _id, std::map<int, int>& _notiList);
-	void		Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<int, int>& _uList, std::map<int, int>& _rList);
+	void		Insert(int _id, int _x, int _y, std::unordered_map<int, int>& _notiList);
+	void		Remove(int _id, std::unordered_map<int, int>& _notiList);
+	void		Update(int _id, int _x, int _y, std::unordered_map<int, int>& _aList, std::unordered_map<int, int>& _uList, std::unordered_map<int, int>& _rList);
 
 	void		Query(int _id, std::vector<int>& _result);
 	SListObj*	GetAoiObj(int _id);
@@ -42,7 +43,7 @@ public:
 public:
 	SListObj*		mRoot;
 	int				mRadius;
-	std::map<int, SListObj*>	mObjMap;
+	std::unordered_map<int, SListObj*>	mObjMap;
 
 };
 

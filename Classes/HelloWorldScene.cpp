@@ -264,7 +264,7 @@ void HelloWorld::AddAgents(int _num)
 			//set clamp box
 			agent->SetClamp(Rect(bigMapPos.x, bigMapPos.y, bigMapSize.width, bigMapSize.height));
 
-			std::map<int, int> notiList;
+			std::unordered_map<int, int> notiList;
 
 			//mAoi->Insert(agent->GetId(), x, y, notiList);
 			mOrthList->Insert(agent->GetId(), x, y, notiList);
@@ -288,7 +288,7 @@ void HelloWorld::DelAgents(int _num)
 			_num--;
 
 		agent = iter->second;
-		std::map<int, int> notiList;
+		std::unordered_map<int, int> notiList;
 
 		//mAoi->Remove(agent->GetId(), notiList);
 		mOrthList->Remove(agent->GetId(), notiList);
@@ -323,7 +323,7 @@ void HelloWorld::SelectAgent(CAgent* _agent)
 	if (mSelAgent == _agent)
 		return;
 
-	DrawNotifyTarget(ENotifyType::Reset, std::map<int, int>());
+	DrawNotifyTarget(ENotifyType::Reset, std::unordered_map<int, int>());
 
 	mSelAgent = _agent;
 	mSelAgent->setColor(Color3B::RED);
@@ -339,7 +339,7 @@ void HelloWorld::SimulateBorn()
 	std::vector<int> notiList;
 	//mAoi->GetTree()->Query(mSelAgent->GetId(), pos.x - gRange, pos.y + gRange, pos.x + gRange, pos.y - gRange, notiList);
 	mOrthList->Query(mSelAgent->GetId(), notiList);
-	std::map<int, int> notiMap;
+	std::unordered_map<int, int> notiMap;
 	for (int id : notiList)
 		notiMap.insert(std::make_pair(id, id));
 
@@ -349,9 +349,9 @@ void HelloWorld::SimulateBorn()
 void HelloWorld::MoveAgent(CAgent* _agent)
 {
 	CCLOG("--- HelloWorld::MoveAgent, moving, id:%d", _agent->GetId());
-	std::map<int, int> addList;
-	std::map<int, int> updateList;
-	std::map<int, int> removeList;
+	std::unordered_map<int, int> addList;
+	std::unordered_map<int, int> updateList;
+	std::unordered_map<int, int> removeList;
 	Vec2 pos = _agent->getPosition();
 	//mAoi->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
 	mOrthList->Update(_agent->GetId(), pos.x, pos.y, addList, updateList, removeList);
@@ -457,7 +457,7 @@ void HelloWorld::DrawTree(CQuadTree* _tree)
 	}
 }
 
-void HelloWorld::DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList)
+void HelloWorld::DrawNotifyTarget(ENotifyType _type, std::unordered_map<int, int>& _notiList)
 {
 	if (_type == ENotifyType::Reset)
 	{

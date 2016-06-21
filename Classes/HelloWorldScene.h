@@ -45,7 +45,7 @@ public:
 	void DrawRange();
 	void DrawAoiTree();
 	void DrawTree(CQuadTree* _tree);
-	void DrawNotifyTarget(ENotifyType _type, std::map<int, int>& _notiList);
+	void DrawNotifyTarget(ENotifyType _type, std::unordered_map<int, int>& _notiList);
 
 	//--- auto move
 	void AutoMove(bool _b);
@@ -64,8 +64,8 @@ private:
 	cocos2d::ui::TextField*	mTFAdd;
 	cocos2d::ui::TextField*	mTFDel;
 
-	std::map<int, CAgent*>	mAgentBigVec;
-	std::map<int, CAgent*>	mAgentAoiVec;
+	std::unordered_map<int, CAgent*>	mAgentBigVec;
+	std::unordered_map<int, CAgent*>	mAgentAoiVec;
 
 	bool	mShowTree;
 

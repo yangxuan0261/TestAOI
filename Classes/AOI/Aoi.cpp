@@ -18,7 +18,7 @@ void CAoi::Init(int _left, int _top, int _right, int _bottom, int _radius)
 	mRadius = _radius;
 }
 
-void CAoi::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
+void CAoi::Insert(int _id, int _x, int _y, std::unordered_map<int, int>& _notiList)
 {
 	if (mObjMap.find(_id) != mObjMap.end()) //已存在，直接返回
 		return;
@@ -50,7 +50,7 @@ void CAoi::Insert(int _id, int _x, int _y, std::map<int, int>& _notiList)
 	mObjMap.insert(std::make_pair(_id, aoiObj));
 }
 
-void CAoi::Remove(int _id, std::map<int, int>& _notiList)
+void CAoi::Remove(int _id, std::unordered_map<int, int>& _notiList)
 {
 	auto iter = mObjMap.find(_id);
 	if (iter == mObjMap.end())
@@ -67,7 +67,7 @@ void CAoi::Remove(int _id, std::map<int, int>& _notiList)
 		auto it = mObjMap.find(id);
 		if (it != mObjMap.end())
 		{
-			std::map<int, int>& list = it->second->mList;
+			std::unordered_map<int, int>& list = it->second->mList;
 			auto listIt = list.find(_id);
 			if (listIt != list.end())
 				list.erase(listIt);
@@ -79,7 +79,7 @@ void CAoi::Remove(int _id, std::map<int, int>& _notiList)
 	mObjMap.erase(_id);
 }
 
-void CAoi::Update(int _id, int _x, int _y, std::map<int, int>& _aList, std::map<int, int>& _uList, std::map<int, int>& _rList)
+void CAoi::Update(int _id, int _x, int _y, std::unordered_map<int, int>& _aList, std::unordered_map<int, int>& _uList, std::unordered_map<int, int>& _rList)
 {
 	auto iter = mObjMap.find(_id); //TODO: Update待优化
 	if (iter == mObjMap.end())
